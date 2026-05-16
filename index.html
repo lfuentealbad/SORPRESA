@@ -1442,8 +1442,8 @@
       storyText:  "Estamos muy felices de contarles que nuestra familia crecerá. Queríamos hacerlo de una forma especial, cercana y bonita, para que puedan acompañarnos desde el comienzo.",
       footerText: "Esperamos compartir este momento especial contigo ❤️",
 
-      // Imagen de la ecografía — debe estar en la misma carpeta que este archivo.
-      ultrasoundImage: "ecografia-000.jpg",
+      // Ecografía: puede ser imagen (.jpg/.png) o video (.mp4/.webm).
+      ultrasoundImage: "Eco.mp4",
       photoCaption:    "Esta es una de las primeras imágenes de nuestro bebé. Aún queda mucho por descubrir, pero queríamos compartir este momento con quienes queremos.",
 
       // Fecha de última menstruación (FUM). Al 25/04/2026 muestra 9 semanas y 4 días.
@@ -1631,17 +1631,35 @@
       });
     }
 
-    // ─── Render imagen ───────────────────────────────────────────────────
+    // ─── Render imagen o video de ecografía ─────────────────────────────
     function renderImage() {
       const frame = $("heroPhotoFrame");
       if (!frame || !CONFIG.ultrasoundImage) return;
-      const img = new Image();
-      img.src   = CONFIG.ultrasoundImage;
-      img.alt   = "Ecografía del bebé";
-      img.onload = () => {
+
+      const src = CONFIG.ultrasoundImage;
+      const isVideo = /\.(mp4|webm|ogg|mov)$/i.test(src);
+
+      if (isVideo) {
+        const video = document.createElement("video");
+        video.src         = src;
+        video.autoplay    = true;
+        video.muted       = true;   // necesario para autoplay en navegadores
+        video.loop        = true;
+        video.playsInline = true;   // iOS no abre fullscreen
+        video.controls    = true;
+        video.style.cssText = "width:100%;height:100%;max-height:510px;display:block;object-fit:cover;";
+        video.onerror = () => {}; // silencioso si no encuentra el archivo
         frame.innerHTML = "";
-        frame.appendChild(img);
-      };
+        frame.appendChild(video);
+      } else {
+        const img = new Image();
+        img.src = src;
+        img.alt = "Ecografía del bebé";
+        img.onload = () => {
+          frame.innerHTML = "";
+          frame.appendChild(img);
+        };
+      }
     }
 
     // ─── Render FAQs (Instagram-style cards) ─────────────────────────────
